@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>LYNEXNON FC | Global Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Oswald:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root { --orange: #ff4500; --bg: #000; --card: #111; --text: #fff; }
+        body { font-family: 'Oswald', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; text-transform: uppercase; }
+        h1, h2, h3, .logo, .lang-btn, .claw-alert-title { font-family: 'Creepster', system-ui; letter-spacing: 2px; }
+
+        header { background: #000; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--orange); position: sticky; top: 0; z-index: 1000; }
+        .lang-btn { background: #222; color: #888; border: 1px solid #444; padding: 5px 10px; cursor: pointer; transition: 0.3s; font-size: 14px; }
+        .lang-btn.active { color: var(--orange); border-color: var(--orange); box-shadow: 0 0 10px var(--orange); }
+
+        #side-menu { position: fixed; left: -300px; top: 0; width: 250px; height: 100%; background: #0a0a0a; border-right: 2px solid var(--orange); transition: 0.4s; z-index: 2500; padding: 40px 20px; }
+        #side-menu.open { left: 0; }
+        .side-link { display: block; color: white; text-decoration: none; padding: 15px; border-bottom: 1px solid #222; font-weight: bold; cursor: pointer; }
+
+        .cart-status { background: var(--orange); padding: 10px 20px; font-weight: bold; cursor: pointer; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        .page { display: none; padding: 20px; animation: fadeIn 0.5s; }
+        .active { display: block; }
+        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 25px; }
+        .product-btn { background: var(--card); border: 2px solid #333; padding: 0; text-align: center; cursor: pointer; overflow: hidden; position: relative; transition: 0.3s; }
+        .product-btn:hover { border-color: var(--orange); transform: scale(1.02); }
+
+        .product-img-box { width: 100%; height: 320px; background: #050505; display: flex; align-items: center; justify-content: center; }
+        .product-img-box img { width: 100%; height: 100%; object-fit: contain; }
+
+        #cart-panel { position: fixed; right: -400px; top: 0; width: 320px; height: 100%; background: rgba(0, 0, 0, 0.98); border-left: 3px solid var(--orange); transition: 0.4s; z-index: 2000; padding: 25px; display: flex; flex-direction: column; box-sizing: border-box; }
+        #cart-panel.open { right: 0; }
+        #cart-items-list { flex: 1; overflow-y: auto; margin-bottom: 10px; }
+        
+        .pay-input { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid var(--orange); color: white; box-sizing: border-box; font-family: 'Oswald'; }
+        .checkout-btn { background: var(--orange); color: white; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; font-size: 18px; font-family: 'Creepster'; letter-spacing: 2px; }
+
+        /* PENÇE ALERT SİSTEMİ */
+        #claw-alert-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 5000; align-items: center; justify-content: center;
+        }
+        .claw-alert-box {
+            background: #000; border: 3px solid var(--orange); padding: 40px; text-align: center;
+            max-width: 400px; width: 90%; position: relative; box-shadow: 0 0 30px var(--orange);
+            clip-path: polygon(5% 0, 100% 0, 95% 100%, 0 100%);
+        }
+        .claw-alert-title { color: var(--orange); font-size: 32px; margin-bottom: 15px; }
+        .claw-alert-msg { font-family: 'Oswald'; font-size: 18px; margin-bottom: 25px; color: #fff; }
+
+        #notification { visibility: hidden; min-width: 280px; background-color: #000; color: var(--orange); text-align: center; padding: 16px; position: fixed; z-index: 3000; left: 50%; bottom: 30px; transform: translateX(-50%); border: 2px solid var(--orange); font-family: 'Creepster'; font-size: 20px; }
+        #notification.show { visibility: visible; animation: slideUp 0.5s, slideDown 0.5s 2.5s; }
+        @keyframes slideUp { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes slideDown { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+    </style>
+</head>
+<body>
+
+<div id="claw-alert-overlay">
+    <div class="claw-alert-box">
+        <div class="claw-alert-title" id="claw-title">DİKKAT!</div>
+        <div class="claw-alert-msg" id="claw-msg">Mesaj buraya gelecek.</div>
+        <button class="checkout-btn" onclick="closeClawAlert()">TAMAM</button>
+    </div>
+</div>
+
+<div id="notification">PENÇELER ATILDI! 🦅</div>
+
+<div id="side-menu">
+    <div style="text-align: right; cursor: pointer; color: var(--orange); font-family: 'Creepster';" onclick="toggleMenu()" data-key="close">KAPAT X</div>
+    <a href="index.html" class="side-link" data-key="news">📰 HABERLER</a>
+    <div class="side-link" onclick="showPage('signedPage'); toggleMenu();" data-key="signed">✍️ İMZALI FORMA</div>
+    <div class="side-link" onclick="showPage('storePage'); toggleMenu();" data-key="home">🏠 ANA MAĞAZA</div>
+</div>
+
+<header>
+    <div style="display: flex; align-items: center;">
+        <div class="menu-dots" onclick="toggleMenu()" style="margin-right: 15px; cursor:pointer;">
+            <div style="width:6px; height:6px; background:var(--orange); border-radius:50%; margin:3px;"></div>
+            <div style="width:6px; height:6px; background:var(--orange); border-radius:50%; margin:3px;"></div>
+            <div style="width:6px; height:6px; background:var(--orange); border-radius:50%; margin:3px;"></div>
+        </div>
+        <div class="logo" style="font-size: 24px; color: var(--orange);">LYNEXNON FC</div>
+    </div>
+    <div style="display: flex; align-items: center;">
+        <div class="lang-switcher" style="display:flex; gap:5px; margin-right:15px;">
+            <div class="lang-btn active" id="btn-tr" onclick="setLang('tr')">TR</div>
+            <div class="lang-btn" id="btn-en" onclick="setLang('en')">EN</div>
+            <div class="lang-btn" id="btn-fr" onclick="setLang('fr')">FR</div>
+        </div>
+        <div class="cart-status" onclick="toggleCart()"><span data-key="cart">SEPET</span> (<span id="cart-count">0</span>)</div>
+    </div>
+</header>
+
+<div id="cart-panel">
+    <h2 style="color: var(--orange);" data-key="your_prey">AVINIZ</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <button onclick="toggleCart()" style="background:#222; color:#fff; border:1px solid #444; padding:8px; cursor:pointer; font-family:'Oswald';" data-key="back_to_shop">← ÜRÜNLERE DÖN</button>
+        <button onclick="clearCart()" style="background:#444; color:#fff; border:none; padding:8px; cursor:pointer; font-family:'Oswald'; font-size:12px;" data-key="clear_cart">TEMİZLE</button>
+    </div>
+    <div id="cart-items-list"></div>
+    <div class="cart-footer" style="border-top: 2px solid var(--orange); padding-top:10px;">
+        <h3 style="margin: 0 0 10px 0;"><span data-key="total">TOPLAM: </span><span id="total-price">0</span> TL</h3>
+        <button class="checkout-btn" onclick="startCheckout()" data-key="pay_btn">ÖDEMEYE PENÇE AT</button>
+    </div>
+</div>
+
+<div class="container">
+    <div id="storePage" class="page active">
+        <h2 style="font-size: 30px;" data-key="collection_title">2026 ZIRH KOLEKSİYONU</h2>
+        <div class="product-grid">
+            <div class="product-btn" onclick="openDetail('İç Saha Forması', 4500, '1749061745806 (3).jpg')">
+                <div class="product-img-box"><img src="1749061745806 (3).jpg"></div>
+                <div class="product-info-box"><b data-key="home_kit">İÇ SAHA</b><br>4.500 TL</div>
+            </div>
+            <div class="product-btn" onclick="openDetail('Deplasman Forması', 4500, '1749061696337 (2).jpg')">
+                <div class="product-img-box"><img src="1749061696337 (2).jpg"></div>
+                <div class="product-info-box"><b data-key="away_kit">DEPLASMAN</b><br>4.500 TL</div>
+            </div>
+            <div class="product-btn" onclick="openDetail('Kaleci Forması', 4500, '1749061794051 (2).jpg')">
+                <div class="product-img-box"><img src="1749061794051 (2).jpg"></div>
+                <div class="product-info-box"><b data-key="gk_kit">KALECİ</b><br>4.500 TL</div>
+            </div>
+            <div class="product-btn" onclick="openDetail('Alternatif Forma', 4000, 'preview-2025-09-17T10_30_43.513Z (3).jpg')">
+                <div class="product-img-box"><img src="preview-2025-09-17T10_30_43.513Z (3).jpg"></div>
+                <div class="product-info-box"><b data-key="alt_kit">ALTERNATİF</b><br>4.000 TL</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="detailPage" class="page">
+        <div onclick="showPage('storePage')" style="cursor:pointer; color:#888; margin-bottom:20px;" data-key="back">← GERİ DÖN</div>
+        <div style="background:#111; padding:30px; border:2px solid var(--orange); text-align: center;">
+            <div id="det-img-cont" style="width:100%; max-width:400px; margin: 0 auto 20px auto;"></div>
+            <h1 id="d-name" style="color: var(--orange);">Ürün</h1>
+            <h2 id="d-price">0 TL</h2>
+            <div style="margin: 20px 0;">
+                <input type="text" id="promo-code" class="pay-input" placeholder="AV KODU (PROMO CODE)" style="width: 60%; display: inline-block;">
+                <button onclick="applyPromo()" class="checkout-btn" style="width: 30%; padding: 10px; font-size: 14px;">UYGULA</button>
+            </div>
+            <button class="checkout-btn" style="padding: 20px;" onclick="addToCart()" data-key="add_cart">SEPETE PENÇE AT</button>
+        </div>
+    </div>
+
+    <div id="checkoutPage" class="page">
+        <div onclick="showPage('storePage')" style="cursor:pointer; color:#888; margin-bottom:20px;" data-key="back">← GERİ DÖN</div>
+        <div style="background:#0a0a0a; padding:30px; border:2px solid var(--orange);">
+            <h2 style="color:var(--orange); font-size: 30px;" data-key="checkout_title">💳 ÖDEME MERKEZİ</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <input type="text" class="pay-input" placeholder="AD SOYAD" style="grid-column: span 2;">
+                <input type="text" class="pay-input" placeholder="KART NUMARASI" style="grid-column: span 2;">
+                <input type="text" class="pay-input" placeholder="AA / YY">
+                <input type="text" class="pay-input" placeholder="CVV">
+            </div>
+            <h3 style="margin-top:20px; font-family: 'Creepster';">TOPLAM: <span id="checkout-total">0</span> TL</h3>
+            <button class="checkout-btn" onclick="completeOrder()" data-key="confirm_pay">SİPARİŞİ PENÇELE</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const langData = {
+        tr: { close: "KAPAT X", news: "📰 HABERLER", signed: "✍️ İMZALI FORMA", home: "🏠 ANA MAĞAZA", cart: "SEPET", your_prey: "AVINIZ", total: "TOPLAM: ", pay_btn: "ÖDEMEYE PENÇE AT", collection_title: "2026 ZIRH KOLEKSİYONU", home_kit: "İÇ SAHA", away_kit: "DEPLASMAN", gk_kit: "KALECİ", alt_kit: "ALTERNATİF", notify: "PENÇELER ATILDI! 🦅", back: "← GERİ DÖN", add_cart: "SEPETE PENÇE AT", checkout_title: "💳 ÖDEME MERKEZİ", confirm_pay: "SİPARİŞİ PENÇELE" },
+        en: { close: "CLOSE X", news: "📰 NEWS", signed: "✍️ SIGNED KITS", home: "🏠 MAIN STORE", cart: "CART", your_prey: "YOUR PREY", total: "TOTAL: ", pay_btn: "CLAW TO PAY", collection_title: "2026 ARMOR COLLECTION", home_kit: "HOME KIT", away_kit: "AWAY KIT", gk_kit: "GK KIT", alt_kit: "ALT KIT", notify: "CLAWS OUT! 🦅", back: "← BACK", add_cart: "ADD TO CLAWS", checkout_title: "💳 CHECKOUT", confirm_pay: "CLAW ORDER" },
+        fr: { close: "FERMER X", news: "📰 NOUVELLES", signed: "✍️ MAILLOTS SIGNÉS", home: "🏠 MAGASIN", cart: "PANIER", your_prey: "VOTRE PROIE", total: "TOTAL: ", pay_btn: "GRIFFE POUR PAYER", collection_title: "COLLECTION 2026", home_kit: "DOMICILE", away_kit: "EXTÉRIEUR", gk_kit: "GARDIEN", alt_kit: "ALT", notify: "GRIFFES SORTIES! 🦅", back: "← RETOUR", add_cart: "AJOUTER AU PANIER", checkout_title: "💳 PAIEMENT", confirm_pay: "COMMANDER" }
+    };
+
+    let currentLang = 'tr';
+    let cart = [];
+    let currentItem = {};
+    let activePrice = 0;
+
+    // ÖZEL PENÇE ALERT FONKSİYONU
+    function clawAlert(title, msg) {
+        document.getElementById('claw-title').innerText = title;
+        document.getElementById('claw-msg').innerText = msg;
+        document.getElementById('claw-alert-overlay').style.display = 'flex';
+    }
+
+    function closeClawAlert() {
+        document.getElementById('claw-alert-overlay').style.display = 'none';
+    }
+
+    function setLang(lang) {
+        currentLang = lang;
+        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('btn-' + lang).classList.add('active');
+        document.querySelectorAll('[data-key]').forEach(el => { el.innerText = langData[lang][el.getAttribute('data-key')]; });
+    }
+
+    function toggleMenu() { document.getElementById('side-menu').classList.toggle('open'); }
+    function toggleCart() { document.getElementById('cart-panel').classList.toggle('open'); }
+    function showPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+    function openDetail(name, price, img) {
+        currentItem = { name, price, img };
+        activePrice = price;
+        document.getElementById('promo-code').value = "";
+        document.getElementById('d-name').innerText = name;
+        document.getElementById('d-price').innerText = price + " TL";
+        document.getElementById('det-img-cont').innerHTML = `<img src="${img}" style="width:100%; object-fit:contain;">`;
+        showPage('detailPage');
+    }
+
+    function applyPromo() {
+        const code = document.getElementById('promo-code').value.trim();
+        if(code === "LYNEX") {
+            activePrice = 2000;
+            document.getElementById('d-price').innerText = "2.000 TL";
+            clawAlert("AV KODU KABUL EDİLDİ!", "PENÇELER DEVREDE: FİYAT 2.000 TL'YE İNDİRİLDİ! 🦅");
+        } else {
+            clawAlert("GEÇERSİZ KOD!", "AV KAÇTI! DOĞRU KODU GİRDİĞİNDEN EMİN OL.");
+        }
+    }
+
+    function addToCart() {
+        cart.push({name: currentItem.name, price: activePrice, id: Date.now()});
+        updateCartUI();
+        const n = document.getElementById("notification");
+        n.className = "show"; setTimeout(() => { n.className = ""; }, 3000);
+    }
+
+    function updateCartUI() {
+        document.getElementById('cart-count').innerText = cart.length;
+        const list = document.getElementById('cart-items-list');
+        let total = cart.reduce((s, i) => s + i.price, 0);
+        list.innerHTML = cart.length === 0 ? '<p>...</p>' : "";
+        cart.forEach(item => {
+            list.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #222;"><span>${item.name}</span> <b>${item.price} TL</b></div>`;
+        });
+        document.getElementById('total-price').innerText = total.toLocaleString();
+    }
+
+    function startCheckout() {
+        if(cart.length === 0) {
+            clawAlert("BOŞ SEPET!", "AVLANACAK BİR ŞEY YOK. ÖNCE SEPETİ DOLDUR!");
+            return;
+        }
+        let total = cart.reduce((s, i) => s + i.price, 0);
+        document.getElementById('checkout-total').innerText = total.toLocaleString();
+        toggleCart(); showPage('checkoutPage');
+    }
+
+    function completeOrder() { 
+        clawAlert("SİPARİŞ TAMAMLANDI!", "AV BAŞARIYLA GERÇEKLEŞTİ. LYNEXNON FC AİLESİNE HOŞ GELDİN! 🦁"); 
+        cart = []; updateCartUI(); showPage('storePage'); 
+    }
+
+    function clearCart() { 
+        clawAlert("SEPET TEMİZLENDİ!", "TÜM AVLAR SERBEST BIRAKILDI."); 
+        cart = []; updateCartUI(); 
+    }
+</script>
+</body>
+</html>
